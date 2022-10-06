@@ -1,7 +1,7 @@
 from sklearn.metrics import precision_recall_curve, average_precision_score, PrecisionRecallDisplay
-
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
+import numpy as np
 
 def top_k_precision(Y_true, prediction, k=20):
   top_k_idx = np.argpartition(prediction, -k, axis=0)[-k:]
