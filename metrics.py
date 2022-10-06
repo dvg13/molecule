@@ -1,4 +1,3 @@
-from sklearn import multioutput, ensemble, linear_model
 from sklearn.metrics import precision_recall_curve, average_precision_score, PrecisionRecallDisplay
 
 import matplotlib.pyplot as plt
