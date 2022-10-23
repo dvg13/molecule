@@ -27,7 +27,7 @@ def binary_output_fn(output_size,params):
     return layers.Dense(
         output_size,
         activation="sigmoid",
-        kernel_regularizer(regularizers.L2(l2_penalty))
+        kernel_regularizer = regularizers.L2(l2_penalty),
         name="BinaryOutput")
         #bias_constraint=keras.constraints.MinMaxNorm(min_value=-1, max_value=1.0))
 
@@ -73,7 +73,7 @@ def gcn_convolution_fn(node_features, adjacency_matrix, params):
         hidden_size,
         activation="elu",
         kernel_initializer='he_normal',
-        kernel_regularizer(regularizers.L2(l2_penalty)),
+        kernel_regularizer = regularizers.L2(l2_penalty),
         name="Transform")(node_features)
 
     #Zero out empty layers - would be better to not add the bias in the first place - or can i use a mask layer?
