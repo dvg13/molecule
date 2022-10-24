@@ -49,25 +49,61 @@ def softmax_output_fn(output_size):
 #Note that Creating custom layers is better for deserialization
 def normalize_adjacency_matrix(adjacency_matrix,use_symmetric_mean, adj_is_sparse):
     if adj_is_sparse:
-        degree = layers.Lambda(
-            lambda x : tf.sparse.reduce_sum(x, axis=2, keepdims=True, output_is_sparse=True)
-        )(adjacency_matrix)
+        degree = sparse_degree_layer(adjacency_matrix)
 
     elif use_symmetric_mean:
-        degree = layers.Lambda(
-            lambda x : tf.sqrt(
-                tf.matmul(
-                    tf.math.reduce_sum(x, axis=2, keepdims=True),
-                    tf.math.reduce_sum(x, axis=1, keepdims=True)
-                )),
-            name='GetSymmtricMean'
-        )(adjacency_matrix)
+        degree = symmetric_degree_layer(adjacency_matrix)
 
     else:
-        degree = layers.Lambda(lambda x : tf.math.reduce_sum(x, axis=2, keepdims=True),
-                               name='GetDegree')(adjacency_matrix)
+        degree = degree_layer(adjacency_matrix)
 
-    return layers.Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]), name='Normalize')([adjacency_matrix, degree])
+    return normalize([adjacency_matrix, degree])
+
+
+def initialize_gcn_convolution_fn():
+    global sparse_degree_layer
+    sparse_degree_layer = layers.Lambda(
+        lambda x : tf.sparse.reduce_sum(x, axis=2, keepdims=True, output_is_sparse=True),
+        name = "GetDegreeSparse"
+    )
+
+    global symmetric_degree_layer
+    symmetric_degree_layer = layers.Lambda(
+        lambda x : tf.sqrt(
+            tf.matmul(
+                tf.math.reduce_sum(x, axis=2, keepdims=True),
+                tf.math.reduce_sum(x, axis=1, keepdims=True)
+            )),
+        name='GetDegreeSymmtric'
+
+    global degree_layer
+    degree_layer = layers.Lambda(
+        lambda x : tf.math.reduce_sum(x, axis=2, keepdims=True),
+        name='GetDegree'
+    )
+
+    global normalize
+    normalize = layers.Lambda(
+        lambda x: tf.math.divide_no_nan(x[0], x[1]),
+        name='Normalize'
+    )
+
+    global get_mask_layer
+    get_mask_layer = layers.Lambda(
+        lambda x:  tf.expand_dims(
+            tf.cast(tf.math.reduce_sum(x, axis=2) != 0, tf.float16),
+            axis=2
+        ),
+        name = 'GetMask'
+
+    global mask_layer
+    mask_layer = tf.keras.layers.Multiply(name='Mask')
+
+    global propogate_layer
+    propogate_layer = layers.Lambda(
+        lambda x : tf.matmul(x[0],x[1]),
+        name="Propogate"
+    )
 
 #the use_sparse options are commented out b/c they don't seem to work for 3-D matrices?  check on this
 def gcn_convolution_fn(dense_layer, node_features, adjacency_matrix,params):
@@ -81,22 +117,17 @@ def gcn_convolution_fn(dense_layer, node_features, adjacency_matrix,params):
 
     #Zero out empty layers - would be better to not add the bias in the first place - or can i use a mask layer?
     # but this works for now (technically would fail where row sums to zero)
-    mask = tf.expand_dims(tf.cast(tf.math.reduce_sum(node_features, axis=2) != 0, tf.float16), axis=2)
-    transformed_node_features = tf.keras.layers.Multiply(name='ZeroOutPadding')([transformed_node_features, mask])
+    mask = get_mask_layer(transformed_node_features)
+    transformed_node_features = mask_layer([transformed_node_features, mask])
 
 
     #Propogate
     normalized_adjacency_matrix = normalize_adjacency_matrix(adjacency_matrix, use_symmetric_mean, adj_is_sparse)
 
     # Creating a custom layer is better for deserialization
-    propogated = layers.Lambda(
-        lambda x : tf.matmul(x[0],
-                             x[1],
-                             #a_is_sparse=tf_matmul_adj_is_sparse,
-                             #b_is_sparse=tf_matmul_fts_is_sparse),
-                            ), name="Propogate")(
+    propogated = propogate_layer(
             [normalized_adjacency_matrix,transformed_node_features]
-        )
+    )
     return propogated
 
 def GCN (num_atoms,
@@ -118,7 +149,7 @@ def GCN (num_atoms,
   else:
       adjacency_matrix = keras.Input(shape=[num_atoms,num_atoms], name="adj", sparse=adj_is_sparse)
 
-
+  initialize_convolution_fn()
   node_features = convolution_fn(
       get_dense_layer(hidden_size,params,"Transform1"),
       input_node_features,
