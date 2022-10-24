@@ -120,14 +120,14 @@ def GCN (num_atoms,
 
 
   node_features = convolution_fn(
-      getDenseLayer(hidden_size,params,"Transform1"),
+      get_dense_layer(hidden_size,params,"Transform1"),
       input_node_features,
       adjacency_matrix,
       params
   )
 
   for step in range(1,convolution_steps):
-      dense_layer = getDenseLayer(hidden_size,params,"Transform" + str(step))
+      dense_layer = get_dense_layer(hidden_size,params,"Transform" + str(step))
       node_features = convultion_fn(dense_layer,node_features,adjacency_matrix)
 
   #combine from multiple atom vectors to one molecule vector
