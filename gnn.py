@@ -155,7 +155,7 @@ def GCN (num_atoms,
   else:
       adjacency_matrix = keras.Input(shape=[num_atoms,num_atoms], name="adj", sparse=adj_is_sparse)
 
-  initialize_convolution_fn()
+  initialize_gcn_convolution_fn()
   node_features = convolution_fn(
       get_dense_layer(hidden_size,params,"Transform1"),
       input_node_features,
