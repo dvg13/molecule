@@ -12,6 +12,16 @@ def padded_mean(x):
     embeddings_sum = tf.reduce_sum(x, axis=1)
     return tf.math.divide_no_nan(embeddings_sum, non_zero_rows)
 
+def get_dense_layer(output_size,params,name):
+    l2_penalty=params.get('l2_penaty',0)
+
+    return layers.Dense(
+        output_size,
+        activation="elu",
+        kernel_initializer='he_normal',
+        kernel_regularizer = regularizers.L2(l2_penalty),
+        name=name)
+
 def mean_combination_fn(node_features, params):
     adj_is_ragged = params.get('adj_is_ragged', False)
 
@@ -60,21 +70,14 @@ def normalize_adjacency_matrix(adjacency_matrix,use_symmetric_mean, adj_is_spars
     return layers.Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]), name='Normalize')([adjacency_matrix, degree])
 
 #the use_sparse options are commented out b/c they don't seem to work for 3-D matrices?  check on this
-def gcn_convolution_fn(node_features, adjacency_matrix, params):
-    hidden_size = params.get('hidden_size', 64)
+def gcn_convolution_fn(dense_layer, node_features, adjacency_matrix,params):
     adj_is_sparse = params.get('adj_is_sparse', False)
     use_symmetric_mean = params.get('use_symmetric_mean', ~adj_is_sparse)
-    l2_penalty = params.get('l2_penalty', 0)
     #tf_matmul_fts_is_sparse = params.get('tf_matmul_fts_is_sparse', False)
     #tf_matmul_adj_is_sparse = params.get('tf_matmul_adj_is_sparse', False)
 
     #Transform
-    transformed_node_features = layers.Dense(
-        hidden_size,
-        activation="elu",
-        kernel_initializer='he_normal',
-        kernel_regularizer = regularizers.L2(l2_penalty),
-        name="Transform")(node_features)
+    transformed_node_features = dense_layer(node_features)
 
     #Zero out empty layers - would be better to not add the bias in the first place - or can i use a mask layer?
     # but this works for now (technically would fail where row sums to zero)
@@ -106,6 +109,7 @@ def GCN (num_atoms,
   convolution_steps = params.get('convolution_steps', 1)
   convolution_fn = params.get('convolution_fn', gcn_convolution_fn)
   combination_fn = params.get('combination_fn', lambda x, params: mean_combination_fn(x, params))
+  hidden_size = params.get('hidden_size', 64)
 
   input_node_features = keras.Input(shape=[num_atoms, feature_size], name="features")
 
@@ -114,8 +118,17 @@ def GCN (num_atoms,
   else:
       adjacency_matrix = keras.Input(shape=[num_atoms,num_atoms], name="adj", sparse=adj_is_sparse)
 
-  for step in range(convolution_steps):
-      node_features = convolution_fn(input_node_features, adjacency_matrix, params)
+
+  node_features = convolution_fn(
+      getDenseLayer(hidden_size,params,"Transform1"),
+      input_node_features,
+      adjacency_matrix,
+      params
+  )
+
+  for step in range(1,convolution_steps):
+      dense_layer = getDenseLayer(hidden_size,params,"Transform" + str(step))
+      node_features = convultion_fn(dense_layer,node_features,adjacency_matrix)
 
   #combine from multiple atom vectors to one molecule vector
   graph_vector = combination_fn(node_features, params)
