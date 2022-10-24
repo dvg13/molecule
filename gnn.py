@@ -135,7 +135,7 @@ def GCN (num_atoms,
 
   #output
   if output_fn is not None:
-      output = output_fn(graph_vector)
+      output = output_fn(graph_vector,params)
   else:
       output = graph_vector
 
