@@ -161,4 +161,4 @@ def ATOM_GCN(num_atoms,
              feature_size,
              output_size,
              **kwargs):
-  return GCN(num_atoms, feature_size, binary_output_fn(output_size,params), kwargs)
+  return GCN(num_atoms, feature_size, binary_output_fn(output_size,kwargs), kwargs)
