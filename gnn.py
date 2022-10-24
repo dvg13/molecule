@@ -75,6 +75,7 @@ def initialize_gcn_convolution_fn():
                 tf.math.reduce_sum(x, axis=1, keepdims=True)
             )),
         name='GetDegreeSymmtric'
+    )
 
     global degree_layer
     degree_layer = layers.Lambda(
@@ -122,7 +123,11 @@ def gcn_convolution_fn(dense_layer, node_features, adjacency_matrix,params):
 
 
     #Propogate
-    normalized_adjacency_matrix = normalize_adjacency_matrix(adjacency_matrix, use_symmetric_mean, adj_is_sparse)
+    normalized_adjacency_matrix = normalize_adjacency_matrix(
+        adjacency_matrix,
+        use_symmetric_mean,
+        adj_is_sparse
+    )
 
     # Creating a custom layer is better for deserialization
     propogated = propogate_layer(
