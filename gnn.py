@@ -96,6 +96,7 @@ def initialize_gcn_convolution_fn():
             axis=2
         ),
         name = 'GetMask'
+    )
 
     global mask_layer
     mask_layer = tf.keras.layers.Multiply(name='Mask')
