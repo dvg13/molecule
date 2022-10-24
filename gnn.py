@@ -157,7 +157,7 @@ def GCN (num_atoms,
 
   initialize_gcn_convolution_fn()
   node_features = convolution_fn(
-      get_dense_layer(hidden_size,params,"Transform1"),
+      get_dense_layer(hidden_size,params,"Transform0"),
       input_node_features,
       adjacency_matrix,
       params
