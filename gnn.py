@@ -216,7 +216,7 @@ def GCN (num_atoms,
 
   for step in range(1,convolution_steps):
       dense_layer = get_dense_layer(hidden_size,params,"Transform" + str(step))
-      node_features = convolution_fn(dense_layer,node_features,adjacency_matrix,mask,params)
+      node_features = convolution_fn(dense_layer,node_features,adjacency_matrix,row_mask,params)
 
   #combine from multiple atom vectors to one molecule vector
   molecule_vector = combination_fn(node_features,row_mask,params)
