@@ -1,4 +1,4 @@
-from sklearn.metrics import precision_recall_curve, average_precision_score, PrecisionRecallDisplay
+from sklearn.metrics import precision_recall_curve, average_precision_score, PrecisionRecallDisplay, roc_auc_score
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
 import numpy as np
@@ -58,7 +58,7 @@ def get_multilabel_stats(model, X, y, k=20):
   prediction = model.predict(X)
 
   #auc
-  auroc = sklearn.metrics.roc_auc_score(y,prediction)
+  auroc = roc_auc_score(y,prediction)
 
   #average precision
   precision, recall, average_precision = get_precisions(y,prediction)
