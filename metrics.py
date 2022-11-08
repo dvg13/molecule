@@ -84,7 +84,7 @@ def get_multilabel_stats(model, X, y, k=20):
       ["{:.2f}".format(x) for x in false_negative_rates]
   )
 
-  print("Auroc: ".format(auroc))
+  print("Auroc: {}".format(auroc))
   print(my_table)
 
   #precision recall graphs
