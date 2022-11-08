@@ -25,7 +25,7 @@ def get_precisions(Y_true, prediction):
     Y_true.ravel(), prediction.ravel()
   )
   average_precision["micro"] = average_precision_score(Y_true, prediction, average="micro")
-  
+
   return precision, recall, average_precision
 
 def plot_micro_average_precision_curve(precision, recall, average_precision):
@@ -53,33 +53,38 @@ def plot_per_label_precision_curves(n, precision, recall, average_precision):
   ax.set_ylim([0.0, 1.2])
   ax.legend(handles=handles, labels=labels, loc="best")
   ax.set_title("Precision-recall by label")
-  
+
 def get_multilabel_stats(model, X, y, k=20):
   prediction = model.predict(X)
-  precision, recall, average_precision = get_precisions(y,prediction)
 
+  #auc
+  auroc = sklearn.metrics.roc_auc_score(y,prediction)
+
+  #average precision
+  precision, recall, average_precision = get_precisions(y,prediction)
   my_table = PrettyTable(["", "Average"] + [str(i) for i in range(1,y.shape[1]+1)])
 
   #auprc
   my_table.add_row(
-      ["Average Precision", "{:.2f}".format(average_precision["micro"])] + 
+      ["Average Precision", "{:.2f}".format(average_precision["micro"])] +
       ["{:.2f}".format(average_precision[i]) for i in range(y.shape[1])]
   )
 
   #top k precision
   top_k_precisions = [top_k_precision(y[:,i], prediction[:,i]) for i in range(y.shape[1])]
   my_table.add_row(
-      ["Top {} Precision".format(k), "{:.2f}".format(np.mean(top_k_precisions))] + 
+      ["Top {} Precision".format(k), "{:.2f}".format(np.mean(top_k_precisions))] +
       ["{:.2f}".format(x) for x in top_k_precisions]
   )
-  
+
   #false negative rate
   false_negative_rates = [false_negative_rate(y[:,i], prediction[:,i]) for i in range(y.shape[1])]
   my_table.add_row(
-      ["False negative rate", "{:.2f}".format(np.mean(false_negative_rates))] + 
+      ["False negative rate", "{:.2f}".format(np.mean(false_negative_rates))] +
       ["{:.2f}".format(x) for x in false_negative_rates]
   )
 
+  print("Auroc: ".format(auroc))
   print(my_table)
 
   #precision recall graphs
