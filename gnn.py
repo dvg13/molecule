@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import layer_utils as utils
+import layers.layer_utils as utils
 
 from combination_layers import mean_combination_fn
 from convolution_layers import gcn_convolution_fn
