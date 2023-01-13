@@ -1,7 +1,7 @@
 import unittest
-import layer_utils as utils
 import tensorflow as tf
 import math
+from .layers import layer_utils as utils
 
 generic_message = "Expected result is {}.\n Actual result is {}"
 

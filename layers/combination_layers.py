@@ -1,5 +1,7 @@
 import layer_utils as utils
 import tensorflow as tf
+
+from .layers import layer_utils as utils
 from tensorflow.keras import layers, regularizers
 
 #this shouldn't be self attention, make it global with and initialize the

@@ -1,5 +1,5 @@
-import layer_utils as utils
 import tensorflow as tf
+from .layers import layer_utils as utils
 
 #the use_sparse options are commented out b/c they don't seem to work for 3-D matrices?  check on this
 def gcn_convolution_fn(dense_layer, node_features, adjacency_matrix,row_mask,params):
