@@ -9,8 +9,8 @@ def gcn_convolution_fn(
         node_features,
         adjacency_matrix,
         row_mask,
+        hidden_size,
         params):
-    hidden_size = params.get('hidden_size',64)
     l2_penalty = params.get('l2_penalty', 0)
     adj_is_sparse = params.get('adj_is_sparse', False)
     use_symmetric_mean = params.get('use_symmetric_mean', ~adj_is_sparse)

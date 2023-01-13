@@ -34,6 +34,7 @@ def GCN (num_atoms,
       input_node_features,
       adjacency_matrix,
       row_mask,
+      hidden_size,
       params
   )
 
