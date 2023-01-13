@@ -30,10 +30,10 @@ def GCN (num_atoms,
   row_mask = utils.get_row_mask(input_node_features)
 
   node_features = convolution_fn(
-      convolution_steps,
       input_node_features,
       adjacency_matrix,
       row_mask,
+      convolution_steps,
       hidden_size,
       params
   )

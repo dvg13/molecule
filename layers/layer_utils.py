@@ -1,14 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras import layers, regularizers
-
-def get_dense_layer(output_size,l2_penalty,name):
-    return layers.Dense(
-        output_size,
-        use_bias=False
-        activation="elu",
-        kernel_initializer='he_normal',
-        kernel_regularizer = regularizers.L2(l2_penalty),
-        name=name)
+from tensorflow.keras import layers
 
 #works in this case.  for general case we may need to scale the abs value
 #of the max and then min this with 1.

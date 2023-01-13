@@ -1,14 +1,14 @@
 import tensorflow as tf
 from . import layer_utils as utils
-from tensorflow.keras import layers
+from tensorflow.keras import layers,regularizers
 
 #refactor this as a layer so that we don't initialize in the function
 #the use_sparse options are commented out b/c they don't seem to work for 3-D matrices?  check on this
 def gcn_convolution_fn(
-        num_convolutions,
         node_features,
         adjacency_matrix,
         row_mask,
+        num_convolutions,
         hidden_size,
         params):
     l2_penalty = params.get('l2_penalty', 0)
@@ -30,10 +30,12 @@ def gcn_convolution_fn(
 
     #Transform
     for convolution in range(num_convolutions):
-        node_features = utils.get_dense_layer(
+        node_features = layers.Dense(
             hidden_size,
-            l2_penalty,
-            "Transform" + str(convolution))(node_features)
+            activation="elu",
+            kernel_initializer='he_normal',
+            kernel_regularizer = regularizers.L2(l2_penalty),
+            name="Transform" + str(convolution)) (node_features)
 
         #Zero out empty layers - would be better to not add the bias in the first place - or can i use a mask layer?
         # but this works for now (technically would fail where row sums to zero)
