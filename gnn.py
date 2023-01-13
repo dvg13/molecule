@@ -2,9 +2,9 @@ import numpy as np
 import tensorflow as tf
 import layers.layer_utils as utils
 
-from combination_layers import mean_combination_fn
-from convolution_layers import gcn_convolution_fn
-from output_layers import binary_output_fn
+from layers.combination_layers import mean_combination_fn
+from layers.convolution_layers import gcn_convolution_fn
+from layers.output_layers import binary_output_fn
 from tensorflow import keras
 
 def GCN (num_atoms,
