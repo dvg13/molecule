@@ -19,14 +19,19 @@ def gcn_convolution_fn(
 
     #initialize layers
     propogate_layer = layers.Lambda(
-            lambda x : tf.matmul(x[0],x[1]),
-            name="Propogate"
+        lambda x : tf.matmul(x[0],x[1]),
+        name="Propogate"
     )
 
     normalized_adjacency_matrix = utils.normalize_adjacency_matrix(
         adjacency_matrix,
         use_symmetric_mean,
         adj_is_sparse)
+
+    zero_out_layer = layers.Lambda(
+        lambda x: tf.multiply(x[0],x[1]),
+        name="ZeroOut"
+    )
 
     #Transform
     for convolution in range(num_convolutions):
@@ -39,13 +44,13 @@ def gcn_convolution_fn(
 
         #Zero out empty layers - would be better to not add the bias in the first place - or can i use a mask layer?
         # but this works for now (technically would fail where row sums to zero)
-        node_features = tf.multiply(node_features,row_mask)
+        node_features = zero_out_layer([node_features, row_mask])
         #transformed_node_features = mask_layer([transformed_node_features, mask])
 
         # Creating a custom layer is better for deserialization
-        node_features = propogate_layer(
+        node_features = propogate_layer([
             normalized_adjacency_matrix,
             node_features
-        )
+        ])
 
     return node_features
