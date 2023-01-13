@@ -30,16 +30,12 @@ def GCN (num_atoms,
   row_mask = utils.get_row_mask(input_node_features)
 
   node_features = convolution_fn(
-      utils.get_dense_layer(hidden_size,params,"Transform0"),
+      convolution_steps,
       input_node_features,
       adjacency_matrix,
       row_mask,
       params
   )
-
-  for step in range(1,convolution_steps):
-      dense_layer = get_dense_layer(hidden_size,params,"Transform" + str(step))
-      node_features = convolution_fn(dense_layer,node_features,adjacency_matrix,row_mask,params)
 
   #combine from multiple atom vectors to one molecule vector
   molecule_vector = combination_fn(node_features,row_mask,params)

@@ -1,9 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers, regularizers
 
-def get_dense_layer(output_size,params,name):
-    l2_penalty=params.get('l2_penalty',0)
-
+def get_dense_layer(output_size,l2_penalty,name):
     return layers.Dense(
         output_size,
         activation="elu",
