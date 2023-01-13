@@ -1,5 +1,5 @@
 from tensorflow.keras import layers, regularizers
-from .layers import layer_utils as utils
+from . import layer_utils as utils
 
 #note that this applies the sigmoid - from_logits should be false in the loss layer
 def binary_output_fn(output_size,params):

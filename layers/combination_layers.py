@@ -1,7 +1,5 @@
-import layer_utils as utils
 import tensorflow as tf
-
-from .layers import layer_utils as utils
+from . import layer_utils as utils
 from tensorflow.keras import layers, regularizers
 
 #this shouldn't be self attention, make it global with and initialize the
@@ -18,7 +16,7 @@ def mean_combination_fn(node_features, row_mask, params):
         return layers.Lambda(lambda x : tf.math.reduce_mean(x,axis=1), name="CombineByMean")(node_features)
     else:
         return layers.Lambda(
-            lambda x_mask: masked_mean(x_mask[0],x_mask[1]),
+            lambda x_mask: utils.masked_mean(x_mask[0],x_mask[1]),
             name="CombineByMean"
         )([node_features,row_mask])
 
@@ -49,7 +47,7 @@ def transformer_attention_combination_fn(node_features,row_mask,params):
 
     node_features = feed_forward_output + node_features
     node_features = tf.keras.layers.LayerNormalization()(node_features)
-    return masked_mean(node_features,row_mask)
+    return utils.masked_mean(node_features,row_mask)
 
 #does having the padding matter - since we don't have bias these should stay zero
 #does this have an output forward layer?  don't think it does

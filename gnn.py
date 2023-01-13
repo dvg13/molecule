@@ -9,6 +9,7 @@ from tensorflow import keras
 
 def GCN (num_atoms,
          feature_size,
+         output_size,
          params):
 
   adj_is_ragged= params.get('adj_is_ragged', False)
@@ -16,7 +17,7 @@ def GCN (num_atoms,
   convolution_steps = params.get('convolution_steps', 1)
   convolution_fn = params.get('convolution_fn', gcn_convolution_fn)
   combination_fn = params.get('combination_fn', mean_combination_fn)
-  output_fn = params.get('output_fn', binary_output_fn)
+  output_fn = params.get('output_fn', binary_output_fn(output_size,params))
   hidden_size = params.get('hidden_size', 64)
 
   input_node_features = keras.Input(shape=[num_atoms, feature_size], name="features")
@@ -29,7 +30,7 @@ def GCN (num_atoms,
   row_mask = utils.get_row_mask(input_node_features)
 
   node_features = convolution_fn(
-      get_dense_layer(hidden_size,params,"Transform0"),
+      utils.get_dense_layer(hidden_size,params,"Transform0"),
       input_node_features,
       adjacency_matrix,
       row_mask,
@@ -68,7 +69,7 @@ def ATOM_GCN(num_atoms,
              feature_size,
              output_size,
              **kwargs):
-  return GCN(num_atoms, feature_size, binary_output_fn(output_size,kwargs), kwargs)
+  return GCN(num_atoms, feature_size, output_size, kwargs)
 
 def ATOM_MULTICLASS_GCN(num_atoms,
                         feature_size,
