@@ -2,7 +2,6 @@ import layer_utils as utils
 import tensorflow as tf
 from tensorflow.keras import layers, regularizers
 
-
 #this shouldn't be self attention, make it global with and initialize the
 #initial weights
 def attention_combination_fn(node_features,row_mask,params):
